@@ -1,0 +1,3 @@
+[submodule "monex_onestock"]
+	path = monex_onestock
+	url = https://github.com/yonedahayato/monex_onestock.git
