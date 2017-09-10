@@ -1,8 +1,13 @@
 import unittest
-import sys
+import sys, time
+import pandas as pd
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+
+sys.path.append("./monex_onestock")
+from monex_onestock import calculate_profit_rate
+
 
 class monex_api(unittest.TestCase):
     def setUp(self, pass_wd, Id):
@@ -56,13 +61,49 @@ class monex_api(unittest.TestCase):
         buy_num_inputer.send_keys(str(buy_num), Keys.RETURN)
 
         #excute = driver.find_element_by_class_name("btn-cmn-move btn-l s-w-210")
-        #excute.click()
+        excute = driver.find_element_by_xpath('//*[@id="gn_service-lm_hakabu"]/div[7]/div/form/div[2]/div[1]/div[2]/p[2]/input')
+        excute.click()
 
-    def sell(self):
-        pass
+    def sell(self, code):
+        print("sell, {}".format(code))
+        driver = self.driver
+
+        stock_trade = driver.find_element_by_class_name("side")
+        stock_trade.click()
+
+        sell_btn = driver.find_element_by_xpath('//*[@id="gn_service-"]/div[6]/div[2]/div/div/div[1]/div[1]/div[1]/div[2]/dl[2]/dd/a')
+        sell_btn.click()
 
     def tearDown(self):
         self.driver.close()
+
+    @staticmethod
+    def time_sleep(sleep_time=20):
+        time.sleep(sleep_time)
+        return
+
+def main(ps_wd, Id, BuySell=None):
+    monex = monex_api()
+    monex.setUp(ps_wd, Id)
+
+    monex.login_monex()
+
+    result_data = calculate_profit_rate.calculate_profit_rate(rate="profit_rate")
+    code = result_data.index[0]
+
+    if BuySell == "buy":
+        monex.buy(str(code), 1)
+    elif BuySell == "sell":
+        monex.sell(str(code))
+    elif BuySell == "result":
+        print("result data")
+        print(result_data)
+    else:
+        raise Exception("input buy or sell")
+
+    monex.time_sleep()
+    monex.tearDown()
+
 
 if __name__ == "__main__":
     argvs = sys.argv
@@ -72,10 +113,4 @@ if __name__ == "__main__":
 
     ps_wd = argvs[1]
     Id = argvs[2]
-
-    monex = monex_api()
-    monex.setUp(ps_wd, Id)
-
-    monex.login_monex()
-    monex.buy(1332, 1)
-    #monex.tearDown()
+    main(ps_wd, Id, BuySell="sell")
