@@ -108,9 +108,10 @@ def main(ps_wd, Id, BuySell=None):
 if __name__ == "__main__":
     argvs = sys.argv
     argc = len(argvs)
-    if argc != 3:
+    if argc != 4:
         raise Exception("input error")
 
     ps_wd = argvs[1]
     Id = argvs[2]
-    main(ps_wd, Id, BuySell="sell")
+    BuySell = argvs[3]
+    main(ps_wd, Id, BuySell=BuySell)
