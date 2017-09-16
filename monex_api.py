@@ -1,6 +1,9 @@
 import unittest
 import sys, time
 import pandas as pd
+import urllib
+import lxml.html
+from io import StringIO, BytesIO
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -71,8 +74,34 @@ class monex_api(unittest.TestCase):
         stock_trade = driver.find_element_by_class_name("side")
         stock_trade.click()
 
-        sell_btn = driver.find_element_by_xpath('//*[@id="gn_service-"]/div[6]/div[2]/div/div/div[1]/div[1]/div[1]/div[2]/dl[2]/dd/a')
+        view_sell_list_btn = driver.find_element_by_xpath('//*[@id="gn_service-"]/div[6]/div[2]/div/div/div[1]/div[1]/div[1]/div[2]/dl[2]/dd/a')
+        view_sell_list_btn.click()
+
+        page_source = driver.page_source
+        doc = lxml.html.parse(StringIO(page_source))
+
+        tables = doc.xpath('//*[@id="gn_custAsset-lm_custAsset"]/div[7]/div/form[1]/table[2]')
+        table = tables[0]
+        table_df = pd.read_html(lxml.etree.tostring(table, method='html'), header=0)
+        table_df = table_df[0]
+        for i in table_df.index:
+            print("== {} ==".format(table_df.ix[i, "銘柄"]))
+            if str(code) in table_df.ix[i, "銘柄"]:
+                print(True)
+                sell_num = i
+            else:
+                print(False)
+        sell_btn_ByCode_xpath = '//*[@id="gn_custAsset-lm_custAsset"]/div[7]/div/form[1]/table[2]/tbody/tr['+str(sell_num+2)+']/td[8]/a[2]'
+        sell_bnt_ByCode = driver.find_element_by_xpath(sell_btn_ByCode_xpath)
+        sell_bnt_ByCode.click()
+
+        sell_btn = driver.find_element_by_xpath('//*[@id="gn_service-lm_hakabu"]/div[7]/div/form/div[2]/div[1]/div[2]/p[2]/input')
         sell_btn.click()
+
+        sell_Execution_btn = driver.find_element_by_xpath('//*[@id="gn_stock-sm_sell"]/div[7]/div/form/div/div[1]/div[2]/p[2]/input')
+        sell_Execution_btn.click()
+
+        raise
 
     def tearDown(self):
         self.driver.close()
@@ -88,8 +117,9 @@ def main(ps_wd, Id, BuySell=None):
 
     monex.login_monex()
 
-    result_data = calculate_profit_rate.calculate_profit_rate(rate="profit_rate")
-    code = result_data.index[0]
+    #result_data = calculate_profit_rate.calculate_profit_rate(rate="profit_rate")
+    #code = result_data.index[0]
+    code = 3662
 
     if BuySell == "buy":
         monex.buy(str(code), 1)
@@ -102,7 +132,7 @@ def main(ps_wd, Id, BuySell=None):
         raise Exception("input buy or sell")
 
     monex.time_sleep()
-    monex.tearDown()
+    #monex.tearDown()
 
 
 if __name__ == "__main__":
