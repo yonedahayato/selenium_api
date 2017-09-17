@@ -101,8 +101,6 @@ class monex_api(unittest.TestCase):
         sell_Execution_btn = driver.find_element_by_xpath('//*[@id="gn_stock-sm_sell"]/div[7]/div/form/div/div[1]/div[2]/p[2]/input')
         sell_Execution_btn.click()
 
-        raise
-
     def tearDown(self):
         self.driver.close()
 
@@ -132,7 +130,7 @@ def main(ps_wd, Id, BuySell=None):
         raise Exception("input buy or sell")
 
     monex.time_sleep()
-    #monex.tearDown()
+    monex.tearDown()
 
 
 if __name__ == "__main__":
