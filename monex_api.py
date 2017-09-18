@@ -172,7 +172,6 @@ def main(ps_wd, Id, BuySell=None, debug=False):
     try:
         if BuySell in ["sell", "buysell"]:
             sell_code = mf.sell_possible_code()
-            sell_code = "6077" ######
     except Exception as e:
         logger.error("fail to calculate sell stock code :::{}".format(e))
         logger.exception("fail to calculate sell stock code :::{}".format(e))
@@ -186,7 +185,6 @@ def main(ps_wd, Id, BuySell=None, debug=False):
 
         elif BuySell == "sell":
             monex.sell(str(sell_code), 1, debug=debug)
-            sell_code = "5204"
             mf.recode_stock_portfolio("sell", str(sell_code), 1)
 
         elif BuySell == "result":
