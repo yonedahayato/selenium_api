@@ -23,11 +23,11 @@ class monex_api(unittest.TestCase):
 		#pwdでカレントディレクトリを確認。
 		#カレントディレクトリの場所をそのまま記述。
 		#seleniumを実行するファイルとChromedriverを同じ場所に格納が楽。
-        web_driver_path = setting.web_driver_path
-        self.driver = webdriver.Chrome(web_driver_path)
+        self.driver = setting.driver
         self.driver.maximize_window()
         self.pass_wd = pass_wd
         self.Id = Id
+        self.driver_kind = setting.driver_kind
 
     def login_monex(self):
         print("login")
@@ -43,7 +43,10 @@ class monex_api(unittest.TestCase):
             # ＊ログインボタンを押す
 
         # ログイン画面に移動
-        btn_login = driver.find_element_by_class_name("btn_login")
+        if self.driver_kind == "phantomJS":
+            btn_login = driver.find_element_by_xpath('//*[@id="hd_nav"]/tbody/tr/td[3]/a')
+        elif self.driver_kind == "chrome":
+            btn_login = driver.find_element_by_class_name("btn_login")
         btn_login.click()
 
         # ログインIDを入力
@@ -61,7 +64,10 @@ class monex_api(unittest.TestCase):
         stock_trade = driver.find_element_by_class_name("side")
         stock_trade.click()
 
-        code_inputer = driver.find_element_by_id("focuson")
+        if self.driver_kind == "phantomJS":
+            code_inputer = driver.find_element_by_xpath('//*[@id="txt_order-buy"]')
+        elif self.driver_kind == "chrome":
+            code_inputer = driver.find_element_by_id("focuson")
         code_inputer.send_keys(str(code), Keys.RETURN)
 
         one_stock = driver.find_element_by_xpath('//*[@id="form01"]/div[3]/ul/li[4]/a')
@@ -82,10 +88,19 @@ class monex_api(unittest.TestCase):
         print("sell, {}".format(code))
         driver = self.driver
 
-        stock_trade = driver.find_element_by_class_name("side")
+        if self.driver_kind == "phantomJS":
+            stock_trade = driver.find_element_by_xpath('//*[@id="product_nav"]/ul/li[1]/a')
+        elif self.driver_kind == "chrome":
+            stock_trade = driver.find_element_by_class_name("side")
         stock_trade.click()
 
-        view_sell_list_btn = driver.find_element_by_xpath('//*[@id="gn_service-"]/div[6]/div[2]/div/div/div[1]/div[1]/div[1]/div[2]/dl[2]/dd/a')
+        #with open("test.html", "w") as f:
+            #f.write(driver.page_source)
+
+        if self.driver_kind == "phantomJS":
+            view_sell_list_btn = driver.find_element_by_xpath('//*[@id="gn_service-"]/div[6]/div[2]/div/div/div[1]/div[1]/div[1]/div[2]/dl[2]/dd/a')
+        elif self.driver_kind == "chrome":
+            view_sell_list_btn = driver.find_element_by_xpath('//*[@id="gn_service-"]/div[6]/div[2]/div/div/div[1]/div[1]/div[1]/div[2]/dl[2]/dd/a')
         view_sell_list_btn.click()
 
         page_source = driver.page_source
@@ -112,8 +127,6 @@ class monex_api(unittest.TestCase):
             else:
                 print(False)
         sell_btn_ByCode_xpath = '//*[@id="gn_custAsset-lm_custAsset"]/div[7]/div/form[1]/table[2]/tbody/tr['+str(sell_num+2)+']/td[8]/a[2]'
-        sell_btn_ByCode_xpath = '//*[@id="gn_custAsset-lm_custAsset"]/div[7]/div/form[1]/table[2]/tbody/tr[3]/td[8]/a[2]'
-        #sell_btn_ByCode_xpath = '//*[@id="gnav"]/li[1]/a'
         sell_bnt_ByCode = driver.find_element_by_xpath(sell_btn_ByCode_xpath)
         location = sell_bnt_ByCode.location["y"] - 100
         driver.execute_script("window.scrollTo(0, %d);" %location)
