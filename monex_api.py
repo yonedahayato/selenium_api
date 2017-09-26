@@ -219,7 +219,7 @@ def main(ps_wd, Id, BuySell=None, debug=False):
         logger.exception("fail to excute buy or sell :::{}".format(e))
         raise
     else:
-        logger.info("success to calculate buy or sell stock code")
+        logger.info("success to excute buy or sell")
 
     monex.time_sleep()
     monex.tearDown()
