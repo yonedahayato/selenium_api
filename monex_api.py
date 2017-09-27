@@ -88,14 +88,24 @@ class monex_api(unittest.TestCase):
         print("sell, {}".format(code))
         driver = self.driver
 
+        with open("test.html", "w") as f:
+            f.write(driver.page_source)
+
         if self.driver_kind == "phantomJS":
             stock_trade = driver.find_element_by_xpath('//*[@id="product_nav"]/ul/li[1]/a')
         elif self.driver_kind == "chrome":
             stock_trade = driver.find_element_by_class_name("side")
         stock_trade.click()
 
-        #with open("test.html", "w") as f:
-            #f.write(driver.page_source)
+        """
+        with open("test1.html", "w") as f:
+            f.write(driver.page_source)
+
+        with open("test2.html", "w") as f:
+            f.write(driver.page_source)
+
+        raise
+        """
 
         if self.driver_kind == "phantomJS":
             view_sell_list_btn = driver.find_element_by_xpath('//*[@id="gn_service-"]/div[6]/div[2]/div/div/div[1]/div[1]/div[1]/div[2]/dl[2]/dd/a')
