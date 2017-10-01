@@ -12,3 +12,10 @@ elif driver_kind == "phantomJS":
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.52 Safari/537.36'
     )
     driver = webdriver.PhantomJS(desired_capabilities=des_cap)
+else:
+    raise Exception("driver error. check setting driver.")
+
+# path
+root_path = "/Users/yoneda/github/selenium_api_youtube/"
+log_save_path = root_path + "log"
+monex_onestock_path = root_path + "monex_onestock"
