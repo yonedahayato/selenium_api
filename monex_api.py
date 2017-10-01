@@ -4,18 +4,21 @@ import pandas as pd
 import urllib
 import lxml.html
 from io import StringIO, BytesIO
+import datetime
+from pytz import timezone
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
+import setting
+monex_onestock_path = setting.monex_onestock_path
+
 sys.path.append("./monex_onestock")
-from monex_onestock import calculate_profit_rate, recode_stock_portfolio
+from monex_onestock import calculate_profit_rate, recode_stock_portfolio, holiday
 mf = recode_stock_portfolio.management_portfolio()
 
 import log
 logger = log.logger
-
-import setting
 
 class monex_api(unittest.TestCase):
     def setUp(self, pass_wd, Id):
@@ -88,24 +91,17 @@ class monex_api(unittest.TestCase):
         print("sell, {}".format(code))
         driver = self.driver
 
+        """
         with open("test.html", "w") as f:
             f.write(driver.page_source)
+        raise
+        """
 
         if self.driver_kind == "phantomJS":
             stock_trade = driver.find_element_by_xpath('//*[@id="product_nav"]/ul/li[1]/a')
         elif self.driver_kind == "chrome":
             stock_trade = driver.find_element_by_class_name("side")
         stock_trade.click()
-
-        """
-        with open("test1.html", "w") as f:
-            f.write(driver.page_source)
-
-        with open("test2.html", "w") as f:
-            f.write(driver.page_source)
-
-        raise
-        """
 
         if self.driver_kind == "phantomJS":
             view_sell_list_btn = driver.find_element_by_xpath('//*[@id="gn_service-"]/div[6]/div[2]/div/div/div[1]/div[1]/div[1]/div[2]/dl[2]/dd/a')
@@ -162,7 +158,34 @@ class monex_api(unittest.TestCase):
         return
 
 def main(ps_wd, Id, BuySell=None, debug=False):
-    try:
+    # auto
+    if BuySell == "auto":
+        BuySell = "buysell"
+        try:
+            utc_now = datetime.datetime.now(timezone('UTC'))
+            jst_now = utc_now.astimezone(timezone('Asia/Tokyo'))
+            search_day = jst_now + datetime.timedelta(days=1)
+
+            weekday = search_day.weekday()
+            # mon: 0, tue: 1, wed: 2, thu: 3, fri: 4, sat: 5, sun: 6
+            search_day_str = str(search_day.date())
+            print("{} is {}".format(search_day, weekday))
+
+            if holiday.holiday_check(search_day_str) or weekday in [5, 6]:
+                Holiday_Flag = True
+                raise Exception("{} is holiday".format(search_day_str))
+
+            else:
+                Holiday_Flag = False
+
+        except Exception as e:
+            logger.error("fail to compute holiday :::{}".format(e))
+            logger.exception("fail to compute holiday :::{}".format(e))
+            raise
+        else:
+            logger.info("success to compute holiday, {} is not holiday".format(search_day_str))
+
+    try: # seting
         monex = monex_api()
         monex.setUp(ps_wd, Id)
     except Exception as e:
@@ -172,7 +195,7 @@ def main(ps_wd, Id, BuySell=None, debug=False):
     else:
         logger.info("success to set up monex api")
 
-    try:
+    try: # login
         monex.login_monex()
     except Exception as e:
         logger.error("fail to login monex page :::{}".format(e))
@@ -181,26 +204,28 @@ def main(ps_wd, Id, BuySell=None, debug=False):
     else:
         logger.info("success to login monex page")
 
-    try:
-        if BuySell in ["buy", "buysell"]:
-            result_data = calculate_profit_rate.calculate_profit_rate(rate="profit_rate")
-            buy_code = result_data.index[0]
-    except Exception as e:
-        logger.error("fail to calculate buy stock code :::{}".format(e))
-        logger.exception("fail to calculate buy stock code :::{}".format(e))
-        raise
-    else:
-        logger.info("success to calculate buy stock code")
+    # searching buy code or sell code
+    if BuySell in ["buy", "buysell"]:
+        try:
+            buy_code_result_data = calculate_profit_rate.calculate_profit_rate(rate="profit_rate")
+            buy_code = buy_code_result_data.index[0]
+        except Exception as e:
+            logger.error("fail to calculate buy stock code :::{}".format(e))
+            logger.exception("fail to calculate buy stock code :::{}".format(e))
+            raise
+        else:
+            logger.info("success to calculate buy stock code")
 
-    try:
-        if BuySell in ["sell", "buysell"]:
+    if BuySell in ["sell", "buysell"]:
+        try:
             sell_code = mf.sell_possible_code()
-    except Exception as e:
-        logger.error("fail to calculate sell stock code :::{}".format(e))
-        logger.exception("fail to calculate sell stock code :::{}".format(e))
-    else:
-        logger.info("success to calculate sell stock code")
+        except Exception as e:
+            logger.error("fail to calculate sell stock code :::{}".format(e))
+            logger.exception("fail to calculate sell stock code :::{}".format(e))
+        else:
+            logger.info("success to calculate sell stock code")
 
+    # action buy or sell and record result
     try:
         if BuySell == "buy":
             monex.buy(str(buy_code), 1, debug=debug)
@@ -211,8 +236,8 @@ def main(ps_wd, Id, BuySell=None, debug=False):
             mf.recode_stock_portfolio("sell", str(sell_code), 1)
 
         elif BuySell == "result":
-            print("resultdata")
-            print(result_data)
+            print("result data")
+            print(buy_code_result_data)
 
         elif BuySell == "buysell":
             monex.buy(str(buy_code), 1, debug=debug)
@@ -222,8 +247,7 @@ def main(ps_wd, Id, BuySell=None, debug=False):
             mf.recode_stock_portfolio("sell", str(sell_code), 1)
 
         else:
-            raise Exception("input buy or sell")
-
+            raise Exception("{} is invalid. search program process".format(BuySell))
     except Exception as e:
         logger.error("fail to excute buy or sell :::{}".format(e))
         logger.exception("fail to excute buy or sell :::{}".format(e))
@@ -245,18 +269,21 @@ if __name__ == "__main__":
             else:
                 raise Exception("input error for debug")
         elif argc != 4:
-            raise Exception("input error")
+            raise Exception("input error. input argc!=4")
         elif argc == 4:
             debug = False
 
         ps_wd = argvs[1]
         Id = argvs[2]
         BuySell = argvs[3]
+        if BuySell not in ["buy", "sell", "result", "buysell", "auto"]:
+            raise Exception("input error. action input")
 
     except Exception as e:
         logger.error("fail to read argument")
         logger.exception("fail to read argument")
-        raise Exception
+        raise Exception(e)
+
     else:
         logger.info("success to read argument")
 
