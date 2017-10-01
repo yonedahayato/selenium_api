@@ -12,10 +12,11 @@ from selenium.webdriver.common.keys import Keys
 
 import setting
 monex_onestock_path = setting.monex_onestock_path
+recode_portfolio_save_path = setting.recode_portfolio_save_path
 
 sys.path.append("./monex_onestock")
 from monex_onestock import calculate_profit_rate, recode_stock_portfolio, holiday
-mf = recode_stock_portfolio.management_portfolio()
+mf = recode_stock_portfolio.management_portfolio(recode_save_path=recode_portfolio_save_path)
 
 import log
 logger = log.logger
