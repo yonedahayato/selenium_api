@@ -99,7 +99,11 @@ class monex_api(unittest.TestCase):
         """
 
         if self.driver_kind == "phantomJS":
-            stock_trade = driver.find_element_by_xpath('//*[@id="product_nav"]/ul/li[1]/a')
+            try:
+                stock_trade = driver.find_element_by_xpath('//*[@id="product_nav"]/ul/li[1]/a')
+            except:
+                stock_trade = driver.find_element_by_class_name("side")
+
         elif self.driver_kind == "chrome":
             stock_trade = driver.find_element_by_class_name("side")
         stock_trade.click()
