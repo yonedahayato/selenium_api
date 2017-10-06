@@ -214,6 +214,10 @@ def main(ps_wd, Id, BuySell=None, debug=False):
         try:
             buy_code_result_data = calculate_profit_rate.calculate_profit_rate(rate="profit_rate")
             buy_code = buy_code_result_data.index[0]
+            buy_profit = buy_code_result_data.loc[buy_code]["profit"]
+            buy_profit_rate = buy_code_result_data.loc[buy_code]["profit_rate"]
+            if buy_profit_rate == 0:
+                raise Exception("buy profit rate is 0")
         except Exception as e:
             logger.error("fail to calculate buy stock code :::{}".format(e))
             logger.exception("fail to calculate buy stock code :::{}".format(e))
@@ -227,6 +231,7 @@ def main(ps_wd, Id, BuySell=None, debug=False):
         except Exception as e:
             logger.error("fail to calculate sell stock code :::{}".format(e))
             logger.exception("fail to calculate sell stock code :::{}".format(e))
+            raise
         else:
             logger.info("success to calculate sell stock code")
 
@@ -234,7 +239,7 @@ def main(ps_wd, Id, BuySell=None, debug=False):
     try:
         if BuySell == "buy":
             monex.buy(str(buy_code), 1, debug=debug)
-            mf.recode_stock_portfolio("buy", str(buy_code), 1)
+            mf.recode_stock_portfolio("buy", str(buy_code), 1, profit=buy_profit, profit_rate=buy_profit_rate)
 
         elif BuySell == "sell":
             monex.sell(str(sell_code), 1, debug=debug)
@@ -246,7 +251,7 @@ def main(ps_wd, Id, BuySell=None, debug=False):
 
         elif BuySell == "buysell":
             monex.buy(str(buy_code), 1, debug=debug)
-            mf.recode_stock_portfolio("buy", str(buy_code), 1)
+            mf.recode_stock_portfolio("buy", str(buy_code), 1, profit=buy_profit, profit_rate=buy_profit_rate)
 
             monex.sell(str(sell_code), 1, debug=debug)
             mf.recode_stock_portfolio("sell", str(sell_code), 1)
