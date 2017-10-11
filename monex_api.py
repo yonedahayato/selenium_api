@@ -250,11 +250,11 @@ def main(ps_wd, Id, BuySell=None, debug=False):
             print(buy_code_result_data)
 
         elif BuySell == "buysell":
-            monex.buy(str(buy_code), 1, debug=debug)
-            mf.recode_stock_portfolio("buy", str(buy_code), 1, profit=buy_profit, profit_rate=buy_profit_rate)
-
             monex.sell(str(sell_code), 1, debug=debug)
             mf.recode_stock_portfolio("sell", str(sell_code), 1)
+
+            monex.buy(str(buy_code), 1, debug=debug)
+            mf.recode_stock_portfolio("buy", str(buy_code), 1, profit=buy_profit, profit_rate=buy_profit_rate)
 
         else:
             raise Exception("{} is invalid. search program process".format(BuySell))
