@@ -238,32 +238,60 @@ def main(ps_wd, Id, BuySell=None, debug=False):
     # action buy or sell and record result
     try:
         if BuySell == "buy":
-            monex.buy(str(buy_code), 1, debug=debug)
-            mf.recode_stock_portfolio("buy", str(buy_code), 1, profit=buy_profit, profit_rate=buy_profit_rate)
+            try:
+                monex.buy(str(buy_code), 1, debug=debug)
+                mf.recode_stock_portfolio("buy", str(buy_code), 1, profit=buy_profit, profit_rate=buy_profit_rate)
+            except Exception as e:
+                logger.error("fail to excute buy action :::{}".format(e))
+                logger.exception("fail to excute buy action :::{}".format(e))
+                raise(e)
+            else:
+                logger.info("success to excute buy action")
 
         elif BuySell == "sell":
-            monex.sell(str(sell_code), 1, debug=debug)
-            mf.recode_stock_portfolio("sell", str(sell_code), 1)
+            try:
+                monex.sell(str(sell_code), 1, debug=debug)
+                mf.recode_stock_portfolio("sell", str(sell_code), 1)
+            except Exception as e:
+                logger.error("fail to excute sell action :::{}".format(e))
+                logger.exception("fail to excute sell action :::{}".format(e))
+                raise(e)
+            else:
+                logger.info("success to excute sell action")
 
         elif BuySell == "result":
             print("result data")
             print(buy_code_result_data)
 
         elif BuySell == "buysell":
-            monex.sell(str(sell_code), 1, debug=debug)
-            mf.recode_stock_portfolio("sell", str(sell_code), 1)
+            try:
+                monex.sell(str(sell_code), 1, debug=debug)
+                mf.recode_stock_portfolio("sell", str(sell_code), 1)
+            except Exception as e:
+                logger.error("fail to excute sell(BuySell) action :::{}".format(e))
+                logger.exception("fail to excute sell(BuySell) action :::{}".format(e))
+            else:
+                logger.info("success to excute sell(BuySell) action")
 
-            monex.buy(str(buy_code), 1, debug=debug)
-            mf.recode_stock_portfolio("buy", str(buy_code), 1, profit=buy_profit, profit_rate=buy_profit_rate)
+            try:
+                monex.buy(str(buy_code), 1, debug=debug)
+                mf.recode_stock_portfolio("buy", str(buy_code), 1, profit=buy_profit, profit_rate=buy_profit_rate)
+            except Exception as e:
+                logger.error("fail to excute buy(BuySell) action :::{}".format(e))
+                logger.exception("fail to excute buy(BuySell) action :::{}".format(e))
+            else:
+                logger.info("success to excute buy(BuySell) action")
 
         else:
             raise Exception("{} is invalid. search program process".format(BuySell))
+
     except Exception as e:
-        logger.error("fail to excute buy or sell :::{}".format(e))
-        logger.exception("fail to excute buy or sell :::{}".format(e))
+        logger.error("fail to excute action :::{}".format(e))
+        logger.exception("fail to excute action :::{}".format(e))
         raise
+
     else:
-        logger.info("success to excute buy or sell")
+        logger.info("success to excute action")
 
     monex.time_sleep()
     monex.tearDown()
