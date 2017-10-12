@@ -231,6 +231,7 @@ def main(ps_wd, Id, BuySell=None, debug=False):
         except Exception as e:
             logger.error("fail to calculate sell stock code :::{}".format(e))
             logger.exception("fail to calculate sell stock code :::{}".format(e))
+            sell_code = None
         else:
             logger.info("success to calculate sell stock code")
 
@@ -249,6 +250,9 @@ def main(ps_wd, Id, BuySell=None, debug=False):
 
         elif BuySell == "sell":
             try:
+                if sell_code == None:
+                    raise("not error, but sell_code is None")
+
                 monex.sell(str(sell_code), 1, debug=debug)
                 mf.recode_stock_portfolio("sell", str(sell_code), 1)
             except Exception as e:
@@ -263,7 +267,11 @@ def main(ps_wd, Id, BuySell=None, debug=False):
             print(buy_code_result_data)
 
         elif BuySell == "buysell":
+            # sell
             try:
+                if sell_code == None:
+                    raise("not error, but sell_code is None")
+
                 monex.sell(str(sell_code), 1, debug=debug)
                 mf.recode_stock_portfolio("sell", str(sell_code), 1)
             except Exception as e:
@@ -272,6 +280,7 @@ def main(ps_wd, Id, BuySell=None, debug=False):
             else:
                 logger.info("success to excute sell(BuySell) action")
 
+            #buy
             try:
                 monex.buy(str(buy_code), 1, debug=debug)
                 mf.recode_stock_portfolio("buy", str(buy_code), 1, profit=buy_profit, profit_rate=buy_profit_rate)
