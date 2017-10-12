@@ -221,7 +221,7 @@ def main(ps_wd, Id, BuySell=None, debug=False):
         except Exception as e:
             logger.error("fail to calculate buy stock code :::{}".format(e))
             logger.exception("fail to calculate buy stock code :::{}".format(e))
-            raise
+            raise(e)
         else:
             logger.info("success to calculate buy stock code")
 
@@ -231,7 +231,6 @@ def main(ps_wd, Id, BuySell=None, debug=False):
         except Exception as e:
             logger.error("fail to calculate sell stock code :::{}".format(e))
             logger.exception("fail to calculate sell stock code :::{}".format(e))
-            raise
         else:
             logger.info("success to calculate sell stock code")
 
