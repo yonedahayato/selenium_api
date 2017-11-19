@@ -18,6 +18,9 @@ sys.path.append("./monex_onestock")
 from monex_onestock import calculate_profit_rate, recode_stock_portfolio, holiday
 mf = recode_stock_portfolio.management_portfolio(recode_save_path=recode_portfolio_save_path)
 
+sys.path.append("./stock_strategy")
+from stock_strategy import move_average
+
 import log
 logger = log.logger
 
@@ -212,12 +215,22 @@ def main(ps_wd, Id, BuySell=None, debug=False):
     # searching buy code or sell code
     if BuySell in ["buy", "buysell"]:
         try:
-            buy_code_result_data = calculate_profit_rate.calculate_profit_rate(rate="profit_rate")
-            buy_code = buy_code_result_data.index[0]
-            buy_profit = buy_code_result_data.loc[buy_code]["profit"]
-            buy_profit_rate = buy_code_result_data.loc[buy_code]["profit_rate"]
-            if buy_profit_rate == 0:
-                raise Exception("buy profit rate is 0")
+            flag_calculate_profit_rate = False
+            flag_move_average = True
+
+            if flag_calculate_profit_rate:
+                buy_code_result_data = calculate_profit_rate.calculate_profit_rate(rate="profit_rate")
+                buy_code = buy_code_result_data.index[0]
+
+                buy_profit = buy_code_result_data.loc[buy_code]["profit"]
+                buy_profit_rate = buy_code_result_data.loc[buy_code]["profit_rate"]
+                if buy_profit_rate == 0:
+                    raise Exception("buy profit rate is 0")
+
+            elif flag_move_average:
+                ma = move_average(value_type="Close", window=window)
+                buy_code = ma.buy_codes()
+
         except Exception as e:
             logger.error("fail to calculate buy stock code :::{}".format(e))
             logger.exception("fail to calculate buy stock code :::{}".format(e))
