@@ -228,8 +228,11 @@ def main(ps_wd, Id, BuySell=None, debug=False):
                     raise Exception("buy profit rate is 0")
 
             elif flag_move_average:
-                ma = move_average(value_type="Close", window=window)
+                window = 75 # 移動平均の期間（日）
+                ma = move_average.move_average(value_type="Close", window=window)
                 buy_code = ma.buy_codes()
+                buy_profit = "Nan"
+                buy_profit_rate = "Nan"
 
         except Exception as e:
             logger.error("fail to calculate buy stock code :::{}".format(e))
