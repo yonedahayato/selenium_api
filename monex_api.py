@@ -95,12 +95,6 @@ class monex_api(unittest.TestCase):
         print("sell, {}".format(code))
         driver = self.driver
 
-        """
-        with open("test.html", "w") as f:
-            f.write(driver.page_source)
-        raise
-        """
-
         if self.driver_kind == "phantomJS":
             try:
                 stock_trade = driver.find_element_by_xpath('//*[@id="product_nav"]/ul/li[1]/a')
@@ -124,6 +118,7 @@ class monex_api(unittest.TestCase):
         table = tables[0]
         table_df = pd.read_html(lxml.etree.tostring(table, method='html'), header=0)
         table_df = table_df[0]
+        print(table_df)
 
         hold_num = table_df.ix[(table_df.ix[:, "銘柄"].str.contains(str(code))), "保有数発注数"].values[0]
         hold_num = hold_num.split("  ")
@@ -260,6 +255,7 @@ def main(ps_wd, Id, BuySell=None, debug=False):
             except Exception as e:
                 logger.error("fail to excute buy action :::{}".format(e))
                 logger.exception("fail to excute buy action :::{}".format(e))
+
                 raise(e)
             else:
                 logger.info("success to excute buy action")
@@ -274,7 +270,10 @@ def main(ps_wd, Id, BuySell=None, debug=False):
             except Exception as e:
                 logger.error("fail to excute sell action :::{}".format(e))
                 logger.exception("fail to excute sell action :::{}".format(e))
+                with open("test.html", "w") as f:
+                    f.write(monex.driver.page_source)
                 raise(e)
+
             else:
                 logger.info("success to excute sell action")
 
