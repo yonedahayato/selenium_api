@@ -6,6 +6,8 @@ import lxml.html
 from io import StringIO, BytesIO
 import datetime
 from pytz import timezone
+import re
+import math
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -13,6 +15,8 @@ from selenium.webdriver.common.keys import Keys
 import setting
 monex_onestock_path = setting.monex_onestock_path
 recode_portfolio_save_path = setting.recode_portfolio_save_path
+
+from parse_monex_info_table import parse_monex_info_table
 
 sys.path.append("./monex_onestock")
 from monex_onestock import calculate_profit_rate, recode_stock_portfolio, holiday
@@ -63,6 +67,8 @@ class monex_api(unittest.TestCase):
         # パスワードを入力
         passwd = driver.find_element_by_id("passwd")
         passwd.send_keys(self.pass_wd, Keys.RETURN)
+
+        self.driver = driver
 
     def buy(self, code, buy_num, debug=False):
         print("buy, {}".format(code))
@@ -116,9 +122,52 @@ class monex_api(unittest.TestCase):
 
         tables = doc.xpath('//*[@id="gn_custAsset-lm_custAsset"]/div[7]/div/form[1]/table[2]')
         table = tables[0]
-        table_df = pd.read_html(lxml.etree.tostring(table, method='html'), header=0)
+        print(lxml.etree.tostring(table, method='html', pretty_print=True))
+
+        table_df = pd.read_html(lxml.etree.tostring(table, method='html', pretty_print=True), header=0)
         table_df = table_df[0]
+
+        parse_monex_info_table(table_df)
+        raise("creaet parser monex info table")
+
+        code_list = table_df.ix[:, "銘柄"].tolist()
+        code_list = [re.search(r" [0-9][0-9][0-9][0-9] ", c).group(0)[1:-1] for c in code_list]
+        print(code_list)
+
+
+        last_day_close_list = table_df.ix[:, "現在値前日終値前日比"].tolist()
+        print(last_day_close_list)
+        last_day_close_list_tmp = []
+        for value in last_day_close_list:
+            if "-" in value:
+                value = value.replace("－", "").replace(" ", "").replace(",", "")
+            else:
+                values = value.split(" ")
+                value_len = len(values[0])
+                if value_len % 2 == 0:
+                    now_value = values[0][:value_len/2]
+                    last_value = values[0][value_len/2:]
+                else:
+                    now_value = values[0][math.floor(value_len):]
+                    last_value = values[0][:math.floor(value_len)]
+
+        last_day_close_list = [value.replace("－", "").replace(" ", "").replace(",", "") for value in last_day_close_list]
+        print(last_day_close_list)
+
+        average_acquisition_cost_list = None
+        possession_list = None
+
+        ordering_list = None
+
+        market_valuation_list = None
+
+        valuation_loss_list = None
+
+        valuation_loss_rate_list = None
+
         print(table_df)
+
+        raise("i am looking table data")
 
         hold_num = table_df.ix[(table_df.ix[:, "銘柄"].str.contains(str(code))), "保有数発注数"].values[0]
         hold_num = hold_num.split("  ")
@@ -270,8 +319,10 @@ def main(ps_wd, Id, BuySell=None, debug=False):
             except Exception as e:
                 logger.error("fail to excute sell action :::{}".format(e))
                 logger.exception("fail to excute sell action :::{}".format(e))
-                with open("test.html", "w") as f:
+                with open("selenium_error.html", "w") as f:
                     f.write(monex.driver.page_source)
+                monex.driver.set_window_size(1024, 768)
+                monex.driver.save_screenshot('selenium_error.png')
                 raise(e)
 
             else:
