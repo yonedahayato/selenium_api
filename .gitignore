@@ -1,6 +1,7 @@
 *.csv
 *.log
-__pycache__
 *.json
 *.txt
 *.html
+
+__pycache__
