@@ -1,32 +1,34 @@
-import unittest
-import sys, time, logging
-import pandas as pd
-import urllib
-import lxml.html
-from io import StringIO, BytesIO
+# lib
 import datetime
+from io import StringIO, BytesIO
+import log
+import logging
+from lxml import html
+import math
+import pandas as pd
 from pytz import timezone
 import re
-import math
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+import sys
+import time
+import unittest
+import urllib
 
-import setting
-monex_onestock_path = setting.monex_onestock_path
-recode_portfolio_save_path = setting.recode_portfolio_save_path
+logger = log.logger
 
-from parse_monex_info_table import parse_monex_info_table
-
+# my lib
 sys.path.append("./monex_onestock")
-from monex_onestock import calculate_profit_rate, recode_stock_portfolio, holiday
-mf = recode_stock_portfolio.management_portfolio(recode_save_path=recode_portfolio_save_path)
-
 sys.path.append("./stock_strategy")
+
+from monex_onestock import calculate_profit_rate, recode_stock_portfolio, holiday
+from parse_monex_info_table import parse_monex_info_table
+import setting
 from stock_strategy import move_average
 
-import log
-logger = log.logger
+mf = recode_stock_portfolio.management_portfolio(recode_save_path=recode_portfolio_save_path)
+monex_onestock_path = setting.monex_onestock_path
+recode_portfolio_save_path = setting.recode_portfolio_save_path
 
 class monex_api(unittest.TestCase):
     def setUp(self, pass_wd, Id):
