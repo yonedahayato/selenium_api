@@ -1,3 +1,4 @@
+import os
 from selenium import webdriver
 
 # driver
@@ -17,7 +18,10 @@ else:
     raise Exception("driver error. check setting driver.")
 
 # path
-root_path = "/Users/yoneda/github/selenium_api_youtube/"
-log_save_path = root_path + "log"
+root_path = "{}/".format(os.getcwd())
+log_save_path = root_path + "/helper/log"
 monex_onestock_path = root_path + "monex_onestock"
 recode_portfolio_save_path = root_path + "recode_portfolio.csv"
+
+if __name__ == "__main__":
+    print(os.getcwd())

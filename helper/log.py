@@ -11,10 +11,15 @@ logger = logging.getLogger("stock_patterns")
 logger.setLevel(10)
 
 # ログのファイル出力先を設定
-#if not os.path.exists("./log"): os.mkdir("./log")
-if not os.path.exists(log_save_path): os.mkdir(log_save_path)
+if not os.path.exists(log_save_path):
+    os.mkdir(log_save_path)
 
-fh = logging.FileHandler(log_save_path + "/monex.log")
+log_file = log_save_path + "/monex.log"
+if not os.path.exists(log_file):
+    f = open(log_file, "a")
+    f.close()
+
+fh = logging.FileHandler(log_file)
 logger.addHandler(fh)
 
 # ログのコンソール出力の設定
