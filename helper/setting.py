@@ -8,10 +8,11 @@ if driver_kind == "chrome":
 elif driver_kind == "phantomJS":
     from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
     des_cap = dict(DesiredCapabilities.PHANTOMJS)
+    pjs_path = '/Users/yoneda/node_modules/phantomjs/bin/phantomjs'
     des_cap['phantomjs.page.settings.userAgent'] = (
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.52 Safari/537.36'
     )
-    driver = webdriver.PhantomJS(desired_capabilities=des_cap)
+    driver = webdriver.PhantomJS(executable_path=pjs_path, desired_capabilities=des_cap)
 else:
     raise Exception("driver error. check setting driver.")
 
