@@ -1,5 +1,6 @@
-import logging, os
-import os.path
+import logging
+import os
+from import path
 
 import setting
 log_save_path = setting.log_save_path
@@ -13,7 +14,7 @@ logger.setLevel(10)
 #if not os.path.exists("./log"): os.mkdir("./log")
 if not os.path.exists(log_save_path): os.mkdir(log_save_path)
 
-fh = logging.FileHandler(log_save_path + "/test.log")
+fh = logging.FileHandler(log_save_path + "/monex.log")
 logger.addHandler(fh)
 
 # ログのコンソール出力の設定
