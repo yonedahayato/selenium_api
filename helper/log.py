@@ -1,6 +1,6 @@
 import logging
 import os
-from import path
+from os import path
 
 import setting
 log_save_path = setting.log_save_path
